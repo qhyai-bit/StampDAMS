@@ -13,6 +13,7 @@ public interface StampService {
 
     Stamp findById(Long id);
 
-    Page<Stamp> page(String keyword, String country, Integer year, Integer pageNum, Integer pageSize);
+    Page<Stamp> page(String keyword, String country, Integer year, String theme, String type,
+                       Integer pageNum, Integer pageSize);
 }
 

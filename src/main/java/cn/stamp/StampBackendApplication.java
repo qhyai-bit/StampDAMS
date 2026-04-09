@@ -9,7 +9,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 @SpringBootApplication
 @MapperScan({
         "cn.stamp.modules.stamp.mapper",
-        "cn.stamp.modules.user.mapper"
+        "cn.stamp.modules.user.mapper",
+        "cn.stamp.modules.market.mapper"
 })
 @EnableConfigurationProperties(StampUploadProperties.class)
 public class StampBackendApplication {

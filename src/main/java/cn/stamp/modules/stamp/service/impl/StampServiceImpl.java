@@ -79,7 +79,8 @@ public class StampServiceImpl implements StampService {
      * @return 分页结果
      */
     @Override
-    public Page<Stamp> page(String keyword, String country, Integer year, Integer pageNum, Integer pageSize) {
+    public Page<Stamp> page(String keyword, String country, Integer year, String theme, String type,
+                              Integer pageNum, Integer pageSize) {
         Page<Stamp> page = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<Stamp> wrapper = new LambdaQueryWrapper<>();
         
@@ -98,6 +99,14 @@ public class StampServiceImpl implements StampService {
         // 年份精确匹配
         if (year != null) {
             wrapper.eq(Stamp::getYear, year);
+        }
+
+        if (theme != null && !theme.isBlank()) {
+            wrapper.eq(Stamp::getTheme, theme);
+        }
+
+        if (type != null && !type.isBlank()) {
+            wrapper.eq(Stamp::getType, type);
         }
         
         // 排序：按年份降序，编码升序
