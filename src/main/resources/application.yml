@@ -4,6 +4,11 @@ server:
 spring:
   application:
     name: stamp-backend
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 55MB
   datasource:
     url: jdbc:mysql://localhost:3306/stamp_dams?useSSL=false&useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root
@@ -38,4 +43,11 @@ knife4j:
   enable: true
   setting:
     language: zh_cn
+
+# 邮票图片本地存储根目录（相对运行目录，也可用绝对路径）
+stamp:
+  upload:
+    root-path: E:/Images
+    public-url-prefix: /files
+
 

@@ -5,6 +5,7 @@ import cn.stamp.common.api.ApiResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -43,6 +44,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ApiResponse<Void> handleBizException(IllegalArgumentException e) {
         return ApiResponse.fail(e.getMessage());
+    }
+
+    /**
+     * 上传文件超过配置大小
+     */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ApiResponse<Void> handleMaxUpload(MaxUploadSizeExceededException e) {
+        return ApiResponse.fail("上传文件过大，请压缩后重试或调整服务端限制");
     }
 
     /**
