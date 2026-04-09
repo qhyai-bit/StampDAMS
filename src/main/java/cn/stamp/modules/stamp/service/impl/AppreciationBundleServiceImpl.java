@@ -12,6 +12,8 @@ import cn.stamp.modules.stamp.vo.AppreciationBundleVO;
 import cn.stamp.modules.stamp.vo.ImageWithAnnotationsVO;
 import cn.stamp.modules.stamp.vo.StampImageVO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -33,30 +35,31 @@ public class AppreciationBundleServiceImpl implements AppreciationBundleService 
      * @return 包含邮票基本信息、鉴赏内容及图片标注信息的完整数据包
      */
     @Override
+    @Cacheable(value = "stamp:bundle", key = "#stampId", unless = "#result == null")
     public AppreciationBundleVO buildBundle(Long stampId) {
-        // 1. 查询邮票基本信息，若不存在则抛出异常
+        // 1. 获取邮票基础信息，若不存在则终止流程
         Stamp stamp = stampService.findById(stampId);
         if (stamp == null) {
             throw new IllegalArgumentException("邮票不存在");
         }
 
-        // 2. 查询邮票鉴赏内容
+        // 2. 获取邮票对应的鉴赏文本内容
         StampAppreciation appreciation = stampAppreciationService.getByStampId(stampId);
 
-        // 3. 查询邮票关联的图片列表，并组装每张图片的标注信息
+        // 3. 获取邮票关联的图片列表，并为每张图片加载其标注信息
         List<StampImageVO> imageVos = stampImageService.listByStampId(stampId);
         List<ImageWithAnnotationsVO> list = new ArrayList<>();
         for (StampImageVO vo : imageVos) {
-            // 获取当前图片的标注列表
+            // 查询当前图片下的所有标注
             List<ImageAnnotation> ann = imageAnnotationService.listByImageId(vo.getId());
-            // 构建包含图片及其标注的对象
+            // 组装图片与其对应的标注数据
             list.add(ImageWithAnnotationsVO.builder()
                     .image(vo)
                     .annotations(ann)
                     .build());
         }
 
-        // 4. 组装并返回完整的鉴赏数据包
+        // 4. 整合所有数据并返回最终结果对象
         return AppreciationBundleVO.builder()
                 .stamp(stamp)
                 .appreciation(appreciation)

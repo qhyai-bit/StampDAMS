@@ -7,6 +7,7 @@ import cn.stamp.modules.stamp.service.StampAppreciationService;
 import cn.stamp.modules.stamp.service.StampService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,9 @@ public class StampAppreciationServiceImpl implements StampAppreciationService {
 
     private final StampAppreciationMapper appreciationMapper;
     private final StampService stampService;
+
+    // 注入 RedisTemplate 用于缓存管理
+    private final RedisTemplate<String, Object> redisTemplate;
 
     /**
      * 根据邮票ID获取鉴赏信息
@@ -77,5 +81,9 @@ public class StampAppreciationServiceImpl implements StampAppreciationService {
             existing.setUpdatedAt(now);
             appreciationMapper.updateById(existing);
         }
+
+        // 核心操作：更新数据库后，必须删除 Redis 中旧的缓存
+        // 格式必须与 @Cacheable 中定义的 key 保持一致：stamp:bundle::ID
+        redisTemplate.delete("stamp:bundle::" + stampId);
     }
 }

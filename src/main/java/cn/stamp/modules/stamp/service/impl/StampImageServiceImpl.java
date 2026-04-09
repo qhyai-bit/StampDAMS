@@ -12,6 +12,7 @@ import cn.stamp.modules.stamp.service.storage.StampImageStorageService;
 import cn.stamp.modules.stamp.vo.StampImageVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,6 +31,9 @@ public class StampImageServiceImpl implements StampImageService {
     private final ImageAnnotationMapper imageAnnotationMapper;
     private final StampImageStorageService storageService;
     private final StampUploadProperties uploadProperties;
+
+    // 注入 RedisTemplate 用于缓存管理
+    private final RedisTemplate<String, Object> redisTemplate;
 
     /**
      * 上传邮票图片
@@ -82,6 +86,9 @@ public class StampImageServiceImpl implements StampImageService {
         
         // 插入数据库
         stampImageMapper.insert(row);
+
+        // 图片变更后，清除该邮票的鉴赏聚合缓存，保证前端看到的是最新图片
+        redisTemplate.delete("stamp:bundle::" + stampId);
 
         return toVo(row);
     }
