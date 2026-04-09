@@ -75,9 +75,10 @@ public class StampController {
                                          @RequestParam(required = false) Integer year,
                                          @RequestParam(required = false) String theme,
                                          @RequestParam(required = false) String type,
+                                         @RequestParam(required = false) Long categoryId,
                                          @RequestParam(defaultValue = "1") Integer pageNum,
                                          @RequestParam(defaultValue = "10") Integer pageSize) {
-        return ApiResponse.success(stampService.page(keyword, country, year, theme, type, pageNum, pageSize));
+        return ApiResponse.success(stampService.page(keyword, country, year, theme, type, categoryId, pageNum, pageSize));
     }
 }
 

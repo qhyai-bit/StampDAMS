@@ -12,6 +12,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
         "cn.stamp.modules.user.mapper",
         "cn.stamp.modules.user.favorite.mapper",
         "cn.stamp.modules.user.comment.mapper",
+        "cn.stamp.modules.category.mapper",
         "cn.stamp.modules.market.mapper"
 })
 @EnableConfigurationProperties(StampUploadProperties.class)

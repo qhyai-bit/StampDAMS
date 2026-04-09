@@ -3,18 +3,23 @@ package cn.stamp.modules.stamp.service.impl;
 import cn.stamp.modules.stamp.entity.Stamp;
 import cn.stamp.modules.stamp.mapper.StampMapper;
 import cn.stamp.modules.stamp.service.StampService;
+import cn.stamp.modules.category.entity.StampCategoryRel;
+import cn.stamp.modules.category.mapper.StampCategoryRelMapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class StampServiceImpl implements StampService {
 
     private final StampMapper stampMapper;
+    private final StampCategoryRelMapper stampCategoryRelMapper;
 
     /**
      * 创建邮票记录
@@ -80,7 +85,8 @@ public class StampServiceImpl implements StampService {
      */
     @Override
     public Page<Stamp> page(String keyword, String country, Integer year, String theme, String type,
-                              Integer pageNum, Integer pageSize) {
+                            Long categoryId,
+                            Integer pageNum, Integer pageSize) {
         Page<Stamp> page = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<Stamp> wrapper = new LambdaQueryWrapper<>();
         
@@ -107,6 +113,19 @@ public class StampServiceImpl implements StampService {
 
         if (type != null && !type.isBlank()) {
             wrapper.eq(Stamp::getType, type);
+        }
+
+        if (categoryId != null) {
+            List<StampCategoryRel> rels = stampCategoryRelMapper.selectList(new LambdaQueryWrapper<StampCategoryRel>()
+                    .eq(StampCategoryRel::getCategoryId, categoryId));
+            List<Long> stampIds = rels.stream().map(StampCategoryRel::getStampId).distinct().collect(Collectors.toList());
+            if (stampIds.isEmpty()) {
+                // 没有任何邮票属于该分类，直接返回空页
+                page.setTotal(0);
+                page.setRecords(List.of());
+                return page;
+            }
+            wrapper.in(Stamp::getId, stampIds);
         }
         
         // 排序：按年份降序，编码升序
