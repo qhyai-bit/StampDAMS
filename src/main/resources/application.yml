@@ -10,8 +10,8 @@ spring:
   servlet:
     multipart:
       enabled: true
-      max-file-size: 50MB
-      max-request-size: 55MB
+      max-file-size: 200MB
+      max-request-size: 210MB
   datasource:
     url: jdbc:mysql://localhost:3306/stamp_dams?useSSL=false&useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root

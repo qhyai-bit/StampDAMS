@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.InputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -79,6 +80,55 @@ public class StampImageStorageService {
                         .toString().replace("\\", "/");
             } catch (Exception ignored) {
                 // 非标准图片或超大图可能导致缩略失败，仅保留原图，不中断主流程
+            }
+        }
+
+        return new SavedImageResult(relImage, relThumb, w, h, size);
+    }
+
+    /**
+     * 保存邮票图片（来自 Zip/InputStream）并生成缩略图
+     *
+     * @param input    文件流（调用方负责提供）
+     * @param filename 原始文件名，用于推断扩展名
+     * @param stampId  邮票ID
+     */
+    public SavedImageResult save(InputStream input, String filename, Long stampId) throws IOException {
+        if (input == null) {
+            throw new IllegalArgumentException("文件流不能为空");
+        }
+        String ext = extractExtension(filename);
+        String uuid = UUID.randomUUID().toString().replace("-", "");
+        String baseName = uuid + "_img" + ext;
+
+        Path root = Paths.get(props.getRootPath()).toAbsolutePath().normalize();
+        Path dir = root.resolve("stamps").resolve(String.valueOf(stampId));
+        Files.createDirectories(dir);
+
+        Path target = dir.resolve(baseName);
+        Files.copy(input, target);
+
+        long size = Files.size(target);
+        BufferedImage bi = ImageIO.read(target.toFile());
+        int w = bi != null ? bi.getWidth() : 0;
+        int h = bi != null ? bi.getHeight() : 0;
+
+        String relImage = Paths.get("stamps", String.valueOf(stampId), baseName)
+                .toString().replace("\\", "/");
+
+        String relThumb = null;
+        if (bi != null) {
+            String thumbName = uuid + "_thumb.jpg";
+            Path thumbPath = dir.resolve(thumbName);
+            try {
+                Thumbnails.of(target.toFile())
+                        .size(props.getThumbMaxEdge(), props.getThumbMaxEdge())
+                        .keepAspectRatio(true)
+                        .outputFormat("jpg")
+                        .toFile(thumbPath.toFile());
+                relThumb = Paths.get("stamps", String.valueOf(stampId), thumbName)
+                        .toString().replace("\\", "/");
+            } catch (Exception ignored) {
             }
         }
 

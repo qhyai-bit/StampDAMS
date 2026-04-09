@@ -3,6 +3,7 @@ package cn.stamp.modules.admin.controller;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.stamp.common.api.ApiResponse;
 import cn.stamp.modules.admin.service.StampBatchService;
+import cn.stamp.modules.admin.service.StampImageBatchService;
 import cn.stamp.modules.admin.vo.ImportResultVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,6 +22,7 @@ import java.io.IOException;
 public class AdminStampBatchController {
 
     private final StampBatchService stampBatchService;
+    private final StampImageBatchService stampImageBatchService;
 
     @Operation(summary = "批量导入邮票（CSV，需登录）")
     @PostMapping(value = "/import-csv", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -34,6 +36,13 @@ public class AdminStampBatchController {
     public void exportCsv(HttpServletResponse response) throws IOException {
         StpUtil.checkLogin();
         stampBatchService.exportStampsCsv(response);
+    }
+
+    @Operation(summary = "批量导入邮票图片（ZIP，按 code 自动识别 FRONT/BACK，需登录）")
+    @PostMapping(value = "/import-images-zip", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<ImportResultVO> importImagesZip(@RequestParam("file") MultipartFile file) throws IOException {
+        StpUtil.checkLogin();
+        return ApiResponse.success(stampImageBatchService.importImagesZip(file));
     }
 }
 
