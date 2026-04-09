@@ -22,5 +22,8 @@ public class LoginResponse {
     private String username;
     /** 昵称 */
     private String nickname;
+
+    /** 角色列表：ADMIN/USER 等（用于前端动态菜单） */
+    private java.util.List<String> roles;
 }
 

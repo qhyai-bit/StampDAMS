@@ -1,6 +1,7 @@
 package cn.stamp.modules.admin.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
+import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.stamp.common.api.ApiResponse;
 import cn.stamp.modules.admin.service.StampBatchService;
 import cn.stamp.modules.admin.service.StampImageBatchService;
@@ -19,6 +20,7 @@ import java.io.IOException;
 @RequestMapping("/api/admin/stamps")
 @RequiredArgsConstructor
 @Tag(name = "系统管理-批量导入导出")
+@SaCheckRole("ADMIN")
 public class AdminStampBatchController {
 
     private final StampBatchService stampBatchService;

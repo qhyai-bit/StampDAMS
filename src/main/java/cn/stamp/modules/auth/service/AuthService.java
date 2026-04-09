@@ -1,6 +1,7 @@
 package cn.stamp.modules.auth.service;
 
 import cn.stamp.modules.auth.dto.LoginRequest;
+import cn.stamp.modules.auth.dto.RegisterRequest;
 import cn.stamp.modules.auth.vo.LoginResponse;
 import cn.stamp.modules.user.entity.SysUser;
 
@@ -13,6 +14,8 @@ public interface AuthService {
      * @return 登录响应信息，包含令牌等
      */
     LoginResponse login(LoginRequest request);
+
+    Long register(RegisterRequest request);
 
     /**
      * 用户登出
