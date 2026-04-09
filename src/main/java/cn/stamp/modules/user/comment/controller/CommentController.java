@@ -3,7 +3,9 @@ package cn.stamp.modules.user.comment.controller;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.stamp.common.api.ApiResponse;
 import cn.stamp.modules.user.comment.dto.CommentCreateDTO;
+import cn.stamp.modules.user.comment.dto.ReplyCreateDTO;
 import cn.stamp.modules.user.comment.entity.Comment;
+import cn.stamp.modules.user.comment.entity.CommentReply;
 import cn.stamp.modules.user.comment.service.CommentService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,6 +13,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -50,6 +54,20 @@ public class CommentController {
         StpUtil.checkLogin();
         long uid = StpUtil.getLoginIdAsLong();
         return ApiResponse.success(commentService.likeToggle(commentId, uid));
+    }
+
+    @Operation(summary = "发布回复（需登录）")
+    @PostMapping("/api/comments/{commentId}/replies")
+    public ApiResponse<Long> addReply(@PathVariable Long commentId, @Valid @RequestBody ReplyCreateDTO dto) {
+        StpUtil.checkLogin();
+        long uid = StpUtil.getLoginIdAsLong();
+        return ApiResponse.success(commentService.addReply(commentId, uid, dto.getContent()));
+    }
+
+    @Operation(summary = "查询某条评论的回复列表")
+    @GetMapping("/api/comments/{commentId}/replies")
+    public ApiResponse<List<CommentReply>> listReplies(@PathVariable Long commentId) {
+        return ApiResponse.success(commentService.listReplies(commentId));
     }
 }
 

@@ -5,8 +5,10 @@ import cn.stamp.common.api.ApiResponse;
 import cn.stamp.modules.stamp.entity.Stamp;
 import cn.stamp.modules.user.favorite.dto.FavoriteAddDTO;
 import cn.stamp.modules.user.favorite.dto.FavoriteFolderSaveDTO;
+import cn.stamp.modules.user.favorite.dto.ShareCreateDTO;
 import cn.stamp.modules.user.favorite.entity.FavoriteFolder;
 import cn.stamp.modules.user.favorite.service.FavoriteService;
+import cn.stamp.modules.user.favorite.vo.ShareInfoVO;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -85,5 +87,26 @@ public class FavoriteController {
         long uid = StpUtil.getLoginIdAsLong();
         return ApiResponse.success(favoriteService.pageFolderItems(uid, folderId, pageNum, pageSize));
     }
+
+    @Operation(summary = "生成分享链接（需登录）")
+    @PostMapping("/folders/{folderId}/share")
+    public ApiResponse<ShareInfoVO> createShare(@PathVariable Long folderId, @Valid @RequestBody ShareCreateDTO dto) {
+        StpUtil.checkLogin();
+        long uid = StpUtil.getLoginIdAsLong();
+        return ApiResponse.success(favoriteService.generateShare(uid, folderId, dto));
+    }
+
+    @Operation(summary = "通过分享码查看收藏夹详情")
+    @GetMapping("/share/{code}")
+    public ApiResponse<FavoriteFolder> viewShareFolder(@PathVariable String code) {
+        return ApiResponse.success(favoriteService.getFolderByShareCode(code));
+    }
+
+    @Operation(summary = "通过分享码查看收藏夹内邮票列表")
+    @GetMapping("/share/{code}/items")
+    public ApiResponse<List<Stamp>> viewShareItems(@PathVariable String code) {
+        return ApiResponse.success(favoriteService.getItemsByShareCode(code));
+    }
+
 }
 

@@ -3,8 +3,10 @@ package cn.stamp.modules.user.comment.service.impl;
 import cn.stamp.modules.stamp.service.StampService;
 import cn.stamp.modules.user.comment.entity.Comment;
 import cn.stamp.modules.user.comment.entity.CommentLike;
+import cn.stamp.modules.user.comment.entity.CommentReply;
 import cn.stamp.modules.user.comment.mapper.CommentLikeMapper;
 import cn.stamp.modules.user.comment.mapper.CommentMapper;
+import cn.stamp.modules.user.comment.mapper.CommentReplyMapper;
 import cn.stamp.modules.user.comment.service.CommentService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +24,7 @@ public class CommentServiceImpl implements CommentService {
     private final CommentMapper commentMapper;
     private final CommentLikeMapper likeMapper;
     private final StampService stampService;
+    private final CommentReplyMapper replyMapper;
 
     /**
      * 创建评论
@@ -138,6 +142,46 @@ public class CommentServiceImpl implements CommentService {
     public long likeCount(Long commentId) {
         Long cnt = likeMapper.selectCount(new LambdaQueryWrapper<CommentLike>().eq(CommentLike::getCommentId, commentId));
         return cnt == null ? 0 : cnt;
+    }
+
+    /**
+     * 添加评论回复
+     *
+     * @param commentId 评论ID
+     * @param userId 用户ID
+     * @param content 回复内容
+     * @return 回复ID
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long addReply(Long commentId, Long userId, String content) {
+        // 校验评论是否存在
+        if (commentMapper.selectById(commentId) == null) {
+            throw new IllegalArgumentException("评论不存在");
+        }
+        // 构建回复对象
+        CommentReply reply = new CommentReply();
+        reply.setCommentId(commentId);
+        reply.setUserId(userId);
+        reply.setContent(content);
+        LocalDateTime now = LocalDateTime.now();
+        reply.setCreatedAt(now);
+        // 插入数据库
+        replyMapper.insert(reply);
+        return reply.getId();
+    }
+
+    /**
+     * 查询指定评论下的回复列表
+     *
+     * @param commentId 评论ID
+     * @return 回复列表
+     */
+    @Override
+    public List<CommentReply> listReplies(Long commentId) {
+        return replyMapper.selectList(new LambdaQueryWrapper<CommentReply>()
+                .eq(CommentReply::getCommentId, commentId)
+                .orderByAsc(CommentReply::getCreatedAt));
     }
 }
 
